@@ -2,6 +2,7 @@ import numpy as np
 import re
 import itertools
 from collections import Counter
+from konlpy.tag import Mecab
 
 
 def clean_str(string):
@@ -44,6 +45,53 @@ def load_data_and_labels(positive_data_file, negative_data_file):
     y = np.concatenate([positive_labels, negative_labels], 0)
     return [x_text, y]
 
+def load_data_and_labels2(file_name):
+    positive_exams = []
+    negative_exams = []
+    positive_count = 0
+    negative_count = 0
+
+    exams = list(open(file_name, "r").readlines())
+    for s in exams:
+        splited = s.split('\t')
+        if splited[2] == '0\n':
+            negative_exams.append(splited[1])
+            negative_count = negative_count + 1
+        elif splited[2] == '1\n':
+            positive_exams.append(splited[1])
+            positive_count = positive_count + 1
+        else:
+            print (splited[0], splited[1], splited[2])
+
+    mecab = Mecab()
+
+    positive_result = []
+    for pp in positive_exams:
+        one_str =  mecab.pos(pp)
+        str_result = ''
+        for p in one_str:
+            if p[1] in {'NNG', 'NNP', 'NNB', 'NNBC', 'VA', 'VV', 'SL', 'SN', 'SY'}:
+                str_result = p[0] + ' ' + str_result
+        positive_result.append(str_result)
+
+    positive_labels = [[0, 1] for _ in positive_result]
+
+    negative_result = []
+    for pp in negative_exams:
+        one_str =  mecab.pos(pp)
+        str_result = ''
+        for p in one_str:
+            if p[1] in {'NNG', 'NNP', 'NNB', 'NNBC', 'VA', 'VV', 'SL', 'SN', 'SY'}:
+                str_result = p[0] + ' ' + str_result
+        negative_result.append(str_result)
+
+    negative_labels = [[1, 0] for _ in negative_result]
+
+    y = np.concatenate([positive_labels, negative_labels], 0)
+
+    x_text = positive_result + negative_result
+        
+    return [x_text, y]
 
 def batch_iter(data, batch_size, num_epochs, shuffle=True):
     """

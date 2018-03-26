@@ -9,6 +9,8 @@ import data_helpers
 from text_cnn import TextCNN
 from tensorflow.contrib import learn
 
+import sys
+
 # Parameters
 # ==================================================
 
@@ -16,6 +18,7 @@ from tensorflow.contrib import learn
 tf.flags.DEFINE_float("dev_sample_percentage", .1, "Percentage of the training data to use for validation")
 tf.flags.DEFINE_string("positive_data_file", "./data/rt-polaritydata/rt-polarity.pos", "Data source for the positive data.")
 tf.flags.DEFINE_string("negative_data_file", "./data/rt-polaritydata/rt-polarity.neg", "Data source for the negative data.")
+tf.flags.DEFINE_string("data_file", "../nsmc/ratings.txt", "Data source for test.")
 
 # Model Hyperparameters
 tf.flags.DEFINE_integer("embedding_dim", 128, "Dimensionality of character embedding (default: 128)")
@@ -47,10 +50,14 @@ print("")
 
 # Load data
 print("Loading data...")
-x_text, y = data_helpers.load_data_and_labels(FLAGS.positive_data_file, FLAGS.negative_data_file)
+#x_text, y = data_helpers.load_data_and_labels(FLAGS.positive_data_file, FLAGS.negative_data_file)
+x_text, y = data_helpers.load_data_and_labels2(FLAGS.data_file)
 
 # Build vocabulary
+# 문자열 중 가장 많은 단어의 수를 구한다.
 max_document_length = max([len(x.split(" ")) for x in x_text])
+# 각 단어들을 map 화 한다.
+# (max_document_length 미만인 문자열들의 단어는 0이된다)
 vocab_processor = learn.preprocessing.VocabularyProcessor(max_document_length)
 x = np.array(list(vocab_processor.fit_transform(x_text)))
 
