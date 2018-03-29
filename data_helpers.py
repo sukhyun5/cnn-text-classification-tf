@@ -96,13 +96,13 @@ def load_data_and_labels2(file_name):
 # data : x_train, y_train 의 zip 형태
 # batch_size : 64
 # num_epochs : 200
+# x와 y를 짝을 지운후 shuffle로 섞어서 batch_size 만큼 return 해주는 함수
 def batch_iter(data, batch_size, num_epochs, shuffle=True):
     """
     Generates a batch iterator for a dataset.
     """
     data = np.array(data)
     data_size = len(data)
-    print (" data_size : ", data_size)
     num_batches_per_epoch = int((len(data)-1)/batch_size) + 1
     for epoch in range(num_epochs):
         # Shuffle the data at each epoch
@@ -115,8 +115,4 @@ def batch_iter(data, batch_size, num_epochs, shuffle=True):
         for batch_num in range(num_batches_per_epoch):
             start_index = batch_num * batch_size
             end_index = min((batch_num + 1) * batch_size, data_size)
-            print (" num_batches_per_epoch : ", num_batches_per_epoch)
-            print (" batch_num, batch_size : ", batch_num, batch_size)
-            print ("start_index, end_index : ", start_index, end_index)
-            print ("shuffle_data : ", shuffled_data[start_index:end_index])
             yield shuffled_data[start_index:end_index]

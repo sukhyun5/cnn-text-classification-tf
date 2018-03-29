@@ -14,6 +14,7 @@ import sys
 def train_step(x_batch, y_batch):
     """
     A single training step
+    training할때의 dropout은 0.5를 준다. 단 검증할때에는 1.0으로 세팅한다.
     """
     feed_dict = {
       cnn.input_x: x_batch,
@@ -25,6 +26,7 @@ def train_step(x_batch, y_batch):
         feed_dict)
     time_str = datetime.datetime.now().isoformat()
     print("{}: step {}, loss {:g}, acc {:g}".format(time_str, step, loss, accuracy))
+    # summary write는 여기에서 한다.
     train_summary_writer.add_summary(summaries, step)
 
 def dev_step(x_batch, y_batch, writer=None):
@@ -197,24 +199,22 @@ with tf.Graph().as_default():
         # Initialize all variables
         sess.run(tf.global_variables_initializer())
 
-
         # Generate batches
         # batches 설명 : 
         batches = data_helpers.batch_iter(
             list(zip(x_train, y_train)), FLAGS.batch_size, FLAGS.num_epochs)
         # Training loop. For each batch...
-        # 
-        print ("===========>", batches)
-        i = 0
+        # batches 에는 batch_iter 에서 리턴한 값(batch_iter 함수 주석참조)이 들어있다.
+        # batch_iter 함수는 yield를 사용하기 때문에 여기서 for 문을 다시한번더 사용해야 하며
+        # batch_iter 는 이부분의 for문 one loop 마다 한번씩 실행되어 값을 리턴한다.
         for batch in batches:
-            print ("i : %d",i) 
-            i = i + 1
-
-        """
-        for batch in batches:
+            # zip(*batch) : batch_iter에서 zip으로 묶인 값인 batch를 다시 unzip 하는 의미
+            # 이유는 x와 y를 분리하기 위해
             x_batch, y_batch = zip(*batch)
             train_step(x_batch, y_batch)
+            # global_step에는 학습 단계의 횟수가 저장되어 있다.
             current_step = tf.train.global_step(sess, global_step)
+            # 100번마다
             if current_step % FLAGS.evaluate_every == 0:
                 print("\nEvaluation:")
                 dev_step(x_dev, y_dev, writer=dev_summary_writer)
@@ -222,4 +222,3 @@ with tf.Graph().as_default():
             if current_step % FLAGS.checkpoint_every == 0:
                 path = saver.save(sess, checkpoint_prefix, global_step=current_step)
                 print("Saved model checkpoint to {}\n".format(path))
-        """
