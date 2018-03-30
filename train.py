@@ -10,6 +10,17 @@ from text_cnn import TextCNN
 from tensorflow.contrib import learn
 
 import sys
+import logging
+
+# define logging
+filename = os.path.basename(__file__)
+logger = logging.getLogger('logger')
+fileHandler = logging.FileHandler('./log/%s.log'%filename)
+logger.addHandler(fileHandler)
+## Change Log Level
+logger.setLevel(logging.DEBUG)
+logging.basicConfig(filename='%s.log'%filename, level=logging.DEBUG)
+
 
 def train_step(x_batch, y_batch):
     """
@@ -25,13 +36,17 @@ def train_step(x_batch, y_batch):
         [train_op, global_step, train_summary_op, cnn.loss, cnn.accuracy],
         feed_dict)
     time_str = datetime.datetime.now().isoformat()
-    print("{}: step {}, loss {:g}, acc {:g}".format(time_str, step, loss, accuracy))
+    #print("{}: step {}, loss {:g}, acc {:g}".format(time_str, step, loss, accuracy))
+    logger.info("{}: step {}, loss {:g}, acc {:g}".format(time_str, step, loss, accuracy))
     # summary write는 여기에서 한다.
     train_summary_writer.add_summary(summaries, step)
 
 def dev_step(x_batch, y_batch, writer=None):
     """
     Evaluates model on a dev set
+    dropout 은 1.0으로 세팅하여 dropout이 적용이 안되도록 한다. 
+    evaluation 에서는 정의한 training procedure의 최종결과인 train_op를 넣지 않고
+    x와 y값만을 넣어 검증하게 된다.
     """
     feed_dict = {
       cnn.input_x: x_batch,
@@ -42,7 +57,8 @@ def dev_step(x_batch, y_batch, writer=None):
         [global_step, dev_summary_op, cnn.loss, cnn.accuracy],
         feed_dict)
     time_str = datetime.datetime.now().isoformat()
-    print("{}: step {}, loss {:g}, acc {:g}".format(time_str, step, loss, accuracy))
+    #print("{}: step {}, loss {:g}, acc {:g}".format(time_str, step, loss, accuracy))
+    logger.info("{}: step {}, loss {:g}, acc {:g}".format(time_str, step, loss, accuracy))
     if writer:
         writer.add_summary(summaries, step)
 
@@ -53,7 +69,7 @@ def dev_step(x_batch, y_batch, writer=None):
 tf.flags.DEFINE_float("dev_sample_percentage", .1, "Percentage of the training data to use for validation")
 #tf.flags.DEFINE_string("positive_data_file", "./data/rt-polaritydata/rt-polarity.pos", "Data source for the positive data.")
 #tf.flags.DEFINE_string("negative_data_file", "./data/rt-polaritydata/rt-polarity.neg", "Data source for the negative data.")
-tf.flags.DEFINE_string("data_file", "./small.txt", "Data source for test.")
+tf.flags.DEFINE_string("data_file", "../../nsmc_inter_files/ratings_train.txt", "Data source for test.")
 
 # Model Hyperparameters
 tf.flags.DEFINE_integer("embedding_dim", 128, "Dimensionality of character embedding (default: 128)")
@@ -74,17 +90,20 @@ tf.flags.DEFINE_boolean("log_device_placement", False, "Log placement of ops on 
 
 FLAGS = tf.flags.FLAGS
 FLAGS._parse_flags()
-print("\nParameters:")
+#print("\nParameters:")
+logger.info("\nParameters:")
 for attr, value in sorted(FLAGS.__flags.items()):
-    print("{}={}".format(attr.upper(), value))
-print("")
+    #print("{}={}".format(attr.upper(), value))
+    logger.info("{}={}".format(attr.upper(), value))
+#print("")
 
 
 # Data Preparation
 # ==================================================
 
 # Load data
-print("Loading data...")
+#print("Loading data...")
+logger.info("Loading data...")
 #x_text, y = data_helpers.load_data_and_labels(FLAGS.positive_data_file, FLAGS.negative_data_file)
 x_text, y = data_helpers.load_data_and_labels2(FLAGS.data_file)
 
@@ -93,6 +112,7 @@ x_text, y = data_helpers.load_data_and_labels2(FLAGS.data_file)
 max_document_length = max([len(x.split(" ")) for x in x_text])
 # 각 단어들을 map 화 한다.
 # (max_document_length 미만인 문자열들의 단어는 0이된다)
+# 참고로 python2.x 에선는 제대로 동작하지 않는다고 한다.
 vocab_processor = learn.preprocessing.VocabularyProcessor(max_document_length)
 x = np.array(list(vocab_processor.fit_transform(x_text)))
 
@@ -122,9 +142,11 @@ y_train, y_dev = y_shuffled[:dev_sample_index], y_shuffled[dev_sample_index:]
 del x, y, x_shuffled, y_shuffled
 
 # Vocabulary size is count of word
-print("Vocabulary Size: {:d}".format(len(vocab_processor.vocabulary_)))
+#print("Vocabulary Size: {:d}".format(len(vocab_processor.vocabulary_)))
+logger.info("Vocabulary Size: {:d}".format(len(vocab_processor.vocabulary_)))
 # Train/Dev : 90%/10%
-print("Train/Dev split: {:d}/{:d}".format(len(y_train), len(y_dev)))
+#print("Train/Dev split: {:d}/{:d}".format(len(y_train), len(y_dev)))
+logger.info("Train/Dev split: {:d}/{:d}".format(len(y_train), len(y_dev)))
 
 
 
@@ -166,8 +188,11 @@ with tf.Graph().as_default():
 
         # Output directory for models and summaries
         timestamp = str(int(time.time()))
-        out_dir = os.path.abspath(os.path.join(os.path.curdir, "runs", timestamp))
-        print("Writing to {}\n".format(out_dir))
+        #out_dir = os.path.abspath(os.path.join(os.path.curdir, "runs", timestamp))
+        inter_files_dir = "../../nsmc_inter_files"
+        out_dir = os.path.abspath(os.path.join(inter_files_dir, "runs", timestamp))
+        #print("Writing to {}\n".format(out_dir))
+        logger.info("Writing to {}\n".format(out_dir))
 
         # Summaries for loss and accuracy
         # Tensorboard에 쓰기 위해 tf.summary 를 사용
@@ -214,11 +239,14 @@ with tf.Graph().as_default():
             train_step(x_batch, y_batch)
             # global_step에는 학습 단계의 횟수가 저장되어 있다.
             current_step = tf.train.global_step(sess, global_step)
-            # 100번마다
+            # 100번마다 evaluation(검증)
             if current_step % FLAGS.evaluate_every == 0:
-                print("\nEvaluation:")
+                #print("\nEvaluation:")
+                logger.info("\nEvaluation:")
                 dev_step(x_dev, y_dev, writer=dev_summary_writer)
-                print("")
+                #print("")
+            # 100번마다 file에 중간결과 저장
             if current_step % FLAGS.checkpoint_every == 0:
                 path = saver.save(sess, checkpoint_prefix, global_step=current_step)
-                print("Saved model checkpoint to {}\n".format(path))
+                #print("Saved model checkpoint to {}\n".format(path))
+                logger.info("Saved model checkpoint to {}\n".format(path))

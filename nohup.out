@@ -1,0 +1,23 @@
+2018-03-30 16:33:58.511560: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use SSE4.1 instructions, but these are available on your machine and could speed up CPU computations.
+2018-03-30 16:33:58.511616: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use SSE4.2 instructions, but these are available on your machine and could speed up CPU computations.
+2018-03-30 16:33:58.511622: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use AVX instructions, but these are available on your machine and could speed up CPU computations.
+2018-03-30 16:33:58.511627: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use AVX2 instructions, but these are available on your machine and could speed up CPU computations.
+2018-03-30 16:33:58.511631: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use FMA instructions, but these are available on your machine and could speed up CPU computations.
+INFO:tensorflow:Summary name embedding/W:0/grad/hist is illegal; using embedding/W_0/grad/hist instead.
+INFO:tensorflow:Summary name embedding/W:0/grad/sparsity is illegal; using embedding/W_0/grad/sparsity instead.
+INFO:tensorflow:Summary name conv-maxpool-3/W:0/grad/hist is illegal; using conv-maxpool-3/W_0/grad/hist instead.
+INFO:tensorflow:Summary name conv-maxpool-3/W:0/grad/sparsity is illegal; using conv-maxpool-3/W_0/grad/sparsity instead.
+INFO:tensorflow:Summary name conv-maxpool-3/b:0/grad/hist is illegal; using conv-maxpool-3/b_0/grad/hist instead.
+INFO:tensorflow:Summary name conv-maxpool-3/b:0/grad/sparsity is illegal; using conv-maxpool-3/b_0/grad/sparsity instead.
+INFO:tensorflow:Summary name conv-maxpool-4/W:0/grad/hist is illegal; using conv-maxpool-4/W_0/grad/hist instead.
+INFO:tensorflow:Summary name conv-maxpool-4/W:0/grad/sparsity is illegal; using conv-maxpool-4/W_0/grad/sparsity instead.
+INFO:tensorflow:Summary name conv-maxpool-4/b:0/grad/hist is illegal; using conv-maxpool-4/b_0/grad/hist instead.
+INFO:tensorflow:Summary name conv-maxpool-4/b:0/grad/sparsity is illegal; using conv-maxpool-4/b_0/grad/sparsity instead.
+INFO:tensorflow:Summary name conv-maxpool-5/W:0/grad/hist is illegal; using conv-maxpool-5/W_0/grad/hist instead.
+INFO:tensorflow:Summary name conv-maxpool-5/W:0/grad/sparsity is illegal; using conv-maxpool-5/W_0/grad/sparsity instead.
+INFO:tensorflow:Summary name conv-maxpool-5/b:0/grad/hist is illegal; using conv-maxpool-5/b_0/grad/hist instead.
+INFO:tensorflow:Summary name conv-maxpool-5/b:0/grad/sparsity is illegal; using conv-maxpool-5/b_0/grad/sparsity instead.
+INFO:tensorflow:Summary name W:0/grad/hist is illegal; using W_0/grad/hist instead.
+INFO:tensorflow:Summary name W:0/grad/sparsity is illegal; using W_0/grad/sparsity instead.
+INFO:tensorflow:Summary name output/b:0/grad/hist is illegal; using output/b_0/grad/hist instead.
+INFO:tensorflow:Summary name output/b:0/grad/sparsity is illegal; using output/b_0/grad/sparsity instead.
